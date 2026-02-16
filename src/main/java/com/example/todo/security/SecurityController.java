@@ -24,20 +24,20 @@ public class SecurityController {
     }
 
 
-    @GetMapping("/")
-    public String home(Model model,
-                       @AuthenticationPrincipal UserDetails userDetails) {
-        if(userDetails != null){
-            User user = userService.findByEmail(userDetails.getUsername());
-            model.addAttribute("user",user);
-        }
-        return "home";
-    }
+//    @GetMapping("/")
+//    public String home(Model model,
+//                       @AuthenticationPrincipal UserDetails userDetails) {
+//        if(userDetails != null){
+//            User user = userService.findByEmail(userDetails.getUsername());
+//            model.addAttribute("user",user);
+//        }
+//        return "home";
+//    }
 
-    @GetMapping("/login")
-    public String login() {
-        return "login";
-    }
+//    @GetMapping("/login")
+//    public String login() {
+//        return "login";
+//    }
 
     @GetMapping("/registration")
     public String register(){

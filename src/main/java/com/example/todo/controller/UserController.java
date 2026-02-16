@@ -66,6 +66,7 @@ public class UserController {
         result.put("user", user.getEmail());
         result.put("token", token);
         result.put("type", "Bearer");
+        result.put("email", user.getEmail());
         result.put("name", user.getName());
         result.put("role", user.getRole());
         return ResponseEntity.status(201).body(result);

@@ -43,15 +43,28 @@
     <!-- ОСНОВНОЙ КОНТЕНТ (ТОЛЬКО ДЛЯ АВТОРИЗОВАННЫХ) -->
     <div id="main-content" style="display: none;">
         <!-- Добавление новой задачи -->
+        <!-- Добавление новой задачи -->
         <div class="card mb-4">
             <div class="card-body">
-                <div class="input-group">
+                <div class="mb-2">
                     <input type="text"
                            class="form-control"
                            id="taskTitle"
-                           placeholder="Введите название задачи">
-                    <button class="btn btn-primary" id="addTaskBtn">Добавить</button>
+                           placeholder="Название задачи">
                 </div>
+                <div class="mb-2">
+            <textarea class="form-control"
+                      id="newTaskDescription"
+                      placeholder="Описание задачи"
+                      rows="2"></textarea>
+                </div>
+                <div class="mb-2">
+                    <input type="date"
+                           class="form-control"
+                           id="taskDeadline"
+                           value="2026-02-16">
+                </div>
+                <button class="btn btn-primary" id="addTaskBtn">Добавить</button>
             </div>
         </div>
 

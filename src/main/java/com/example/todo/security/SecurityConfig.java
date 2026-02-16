@@ -42,17 +42,17 @@ public class SecurityConfig {
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS) // ВАЖНО: отключаем сессии!
                 )
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/", "/login", "/registration/**", "/css/**", "/error","/js/**").permitAll()
+                        .requestMatchers("/", "/login", "/registration/**", "/css/**", "/error","/js/**", "/index.html").permitAll()
                         .requestMatchers("/v1/api/auth/**").permitAll()
                         .requestMatchers("/admin/**", "/api/admin/**").hasRole("ADMIN")
                         .requestMatchers("/api/v1/tasks", "/api/v1/tasks/**","/v1/task/**","/api/**").hasAnyRole("USER", "ADMIN")
                         .anyRequest().authenticated()
                 )
-                .formLogin(form -> form
-                        .loginPage("/login")
-                        .defaultSuccessUrl("/v1/task/main")
-                        .permitAll()
-                )
+////                .formLogin(form -> form
+////                        .loginPage("/login")
+////                        .defaultSuccessUrl("/v1/task/main")
+////                        .permitAll()
+//                )
                 .logout(logout -> logout
                         .logoutSuccessUrl("/")
                         .invalidateHttpSession(true)

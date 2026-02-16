@@ -13,7 +13,7 @@ const API = {
     // Если у тебя UserController с @RequestMapping("/v1/api")
     BASE: '/v1/api',
     // Если у тебя TaskRestController с @RequestMapping("/api/v1")
-    TASKS: '/api/v1/tasks'
+    TASKS: '/api/v1'
 };
 
 // ===========================================
@@ -51,6 +51,8 @@ function checkSavedAuth() {
 // НАВЕШИВАНИЕ ОБРАБОТЧИКОВ СОБЫТИЙ
 // ===========================================
 function bindEvents() {
+    console.log('🔧 Привязываем события...');
+
     // Регистрация
     $('#registerBtn').on('click', registerUser);
 
@@ -60,8 +62,12 @@ function bindEvents() {
     // Выход
     $('#logoutBtn').on('click', logoutUser);
 
-    // Добавление задачи
-    $('#addTaskBtn').on('click', addTask);
+    // Добавление задачи - УБЕДИСЬ, ЧТО ЭТА СТРОКА ЕСТЬ!
+    $('#addTaskBtn').on('click', function(e) {
+        e.preventDefault();  // предотвращаем стандартное поведение
+        console.log('👆 Кнопка добавления нажата');
+        addTask();
+    });
 
     // Добавление задачи по Enter
     $('#taskTitle').on('keypress', function(e) {
@@ -72,6 +78,8 @@ function bindEvents() {
 
     // Удаление задачи
     $('#deleteTaskBtn').on('click', deleteTask);
+
+    console.log('✅ Все события привязаны');
 }
 
 // ===========================================
@@ -198,7 +206,7 @@ function loginUser() {
                 email: response.email,
                 name: response.name,
                 role: response.role
-            };
+    };
 
             localStorage.setItem('jwt_token', jwtToken);
             localStorage.setItem('current_user', JSON.stringify(currentUser));
@@ -372,38 +380,58 @@ function escapeHtml(text) {
 // ДОБАВЛЕНИЕ НОВОЙ ЗАДАЧИ
 // ===========================================
 function addTask() {
+    console.log('📝 Функция addTask вызвана');
+
     const title = $('#taskTitle').val().trim();
+    const description = $('#newTaskDescription').val().trim() || 'Новая задача';
+    const deadline = $('#taskDeadline').val() || new Date().toISOString().split('T')[0];
+
+    console.log('📝 Данные из формы:', { title, description, deadline });
 
     if (!title) {
         alert('Введите название задачи');
         return;
     }
 
+    // СОЗДАЕМ ОБЪЕКТ taskData (не newTask!)
+    const taskData = {
+        name: title,
+        description: description,
+        deadline: deadline
+    };
+
+    console.log('📦 Отправляю на сервер:', taskData);
+    console.log('🔑 Заголовки:', getAuthHeaders());
+
     $.ajax({
         url: `${API.TASKS}/tasks`,
         method: 'POST',
         headers: getAuthHeaders(),
         contentType: 'application/json',
-        data: JSON.stringify({
-            name: title,
-            description: '',
-            deadline: null
-        }),
+        data: JSON.stringify(taskData),
         success: function(response) {
-            console.log('Задача добавлена:', response);
+            console.log('✅ Успех! Ответ сервера:', response);
 
-            // Очищаем поле ввода
+            // Очищаем поля
             $('#taskTitle').val('');
+            $('#taskDescription').val('');
 
             // Перезагружаем список задач
             loadTasks();
         },
         error: function(xhr) {
-            console.error('Ошибка добавления задачи:', xhr);
-            alert('Не удалось добавить задачу');
+            console.error('❌ Ошибка! Статус:', xhr.status);
+            console.error('❌ Ответ сервера:', xhr.responseJSON);
+
+            let errorMsg = 'Не удалось добавить задачу';
+            if (xhr.responseJSON?.message) {
+                errorMsg = xhr.responseJSON.message;
+            }
+            alert('Ошибка: ' + errorMsg);
         }
     });
 }
+
 
 // ===========================================
 // ОТКРЫТИЕ МОДАЛЬНОГО ОКНА ЗАДАЧИ
@@ -443,31 +471,23 @@ function saveTaskField(fieldName) {
     const taskId = $('#taskId').val();
     if (!taskId) return;
 
-    let value;
-    let updateData = {};
+    let updateData = { id: taskId };  // всегда отправляем id
 
-    // Получаем значение в зависимости от поля
     switch(fieldName) {
         case 'name':
-            value = $('#taskName').val();
-            updateData.name = value;
+            updateData.name = $('#taskName').val();
             break;
         case 'description':
-            value = $('#taskDescription').val();
-            updateData.description = value;
+            updateData.description = $('#taskDescription').val();
             break;
         case 'status':
             const isCompleted = $('#taskStatus').is(':checked');
-            updateData.status = isCompleted ? 'COMPLETED' : 'ACTIVE';
+            updateData.status = isCompleted ? 'COMPLETED' : 'INACTIVE';  // ← INACTIVE!
             break;
     }
 
-    // Добавляем ID задачи
-    updateData.id = taskId;
+    console.log('Сохраняем задачу:', updateData);
 
-    console.log(`Сохраняем поле ${fieldName}:`, updateData);
-
-    // Отправляем запрос на обновление
     $.ajax({
         url: `${API.TASKS}/tasks`,
         method: 'PATCH',
@@ -476,20 +496,12 @@ function saveTaskField(fieldName) {
         data: JSON.stringify(updateData),
         success: function() {
             console.log(`Поле ${fieldName} сохранено`);
-
-            // Если изменили статус, обновляем список задач
             if (fieldName === 'status') {
-                loadTasks();
+                loadTasks();  // перезагружаем список при изменении статуса
             }
         },
         error: function(xhr) {
             console.error(`Ошибка сохранения ${fieldName}:`, xhr);
-
-            // Восстанавливаем предыдущее значение
-            if (fieldName === 'status') {
-                $('#taskStatus').prop('checked', !$('#taskStatus').is(':checked'));
-            }
-
             alert('Не удалось сохранить изменения');
         }
     });

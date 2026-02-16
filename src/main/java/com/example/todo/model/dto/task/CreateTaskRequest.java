@@ -20,7 +20,7 @@ public record CreateTaskRequest(
         @NotNull(message = "Дедлайн обязателен")
         LocalDate deadline,
 
-        @NotNull
+        //@NotNull
         Long userId
 
 ) {
